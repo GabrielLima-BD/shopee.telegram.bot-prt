@@ -1,0 +1,105 @@
+╔═══════════════════════════════════════════════════════════╗
+║     SHOPEE TELEGRAM BOT - GUIA RÁPIDO DE USO            ║
+╚═══════════════════════════════════════════════════════════╝
+
+📦 CONTEÚDO DA PASTA:
+├── Shopee-Telegram-BOT.exe    → Executável principal
+├── .env.template              → Template de configuração
+└── LEIA-ME.txt                → Documentação completa
+
+═══════════════════════════════════════════════════════════
+
+⚡ INSTALAÇÃO RÁPIDA (5 MINUTOS):
+
+1️⃣ INSTALAR FFMPEG (obrigatório):
+   → Download: https://www.gyan.dev/ffmpeg/builds/
+   → Extrair para: C:\ffmpeg
+   → Adicionar ao PATH: C:\ffmpeg\bin
+
+2️⃣ CONFIGURAR BOT:
+   → Renomear .env.template para .env
+   → Editar .env com suas credenciais:
+     • TELEGRAM_BOT_TOKEN
+     • TELEGRAM_CHAT_ID
+     • TELEGRAM_SEND_TOKEN
+
+3️⃣ EXECUTAR:
+   → Duplo clique em Shopee-Telegram-BOT.exe
+   → OU clique direito → Executar como Administrador
+
+═══════════════════════════════════════════════════════════
+
+🤖 OBTER CREDENCIAIS DO TELEGRAM:
+
+📝 Token do Bot:
+   1. Abra Telegram → @BotFather
+   2. Digite: /newbot
+   3. Siga instruções
+   4. Copie o token fornecido
+
+🆔 Chat ID:
+   Método 1:
+   1. Procure: @userinfobot
+   2. Digite: /start
+   3. Copie seu ID
+
+   Método 2:
+   1. Envie mensagem ao seu bot
+   2. Acesse: https://api.telegram.org/bot<TOKEN>/getUpdates
+   3. Procure: "chat":{"id":123456789}
+
+═══════════════════════════════════════════════════════════
+
+💡 COMO USAR:
+
+1. Execute Shopee-Telegram-BOT.exe
+2. Clique em "➕ Adicionar e Processar Vídeos"
+3. Preencha:
+   • Link do vídeo (.mp4)
+   • Link do produto
+   • Descrição
+4. Clique "▶️ Processar Todos"
+
+✨ MODOS DE PROCESSAMENTO:
+   • Individual: Para poucos vídeos
+   • Por Etapas: Para 30-40 vídeos (mais rápido)
+   • Reprocessar Falhas: Para tentar novamente
+
+═══════════════════════════════════════════════════════════
+
+⚠️ TROUBLESHOOTING:
+
+❌ "FFmpeg não encontrado"
+   → Instale FFmpeg e adicione ao PATH
+
+❌ "Bot não recebe mensagens"
+   → Verifique token no .env
+   → Envie /start para o bot
+
+❌ "Executável não abre"
+   → Execute via CMD para ver erros:
+     cmd /k Shopee-Telegram-BOT.exe
+
+═══════════════════════════════════════════════════════════
+
+🔐 SEGURANÇA:
+⚠️ NUNCA compartilhe o arquivo .env!
+   Ele contém tokens sensíveis do seu bot.
+
+═══════════════════════════════════════════════════════════
+
+📧 SUPORTE:
+   GitHub: github.com/GabrielLima-BD/P---Shopee_Telegram-BOT
+   Issues: github.com/GabrielLima-BD/P---Shopee_Telegram-BOT/issues
+
+═══════════════════════════════════════════════════════════
+
+🎯 RECURSOS:
+   ✅ Upscale automático para 720p+
+   ✅ Banco de dados dual
+   ✅ Interface gráfica moderna
+   ✅ Processamento em lote
+   ✅ Sistema de retry
+   ✅ Logs em tempo real
+
+═══════════════════════════════════════════════════════════
