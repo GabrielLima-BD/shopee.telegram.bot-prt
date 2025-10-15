@@ -30,3 +30,6 @@ processed/
 # PyInstaller
 *.manifest
 *.spec
+build/
+dist/
+Aplicativo/*.exe

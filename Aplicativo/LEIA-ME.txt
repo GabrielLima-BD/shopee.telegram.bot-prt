@@ -1,0 +1,118 @@
+# 🚀 Shopee Telegram BOT - Executável
+
+## 📦 Como Usar
+
+### 1️⃣ Primeira Instalação
+
+1. **Instale o FFmpeg** (obrigatório)
+   - Download: https://www.gyan.dev/ffmpeg/builds/
+   - Extraia para `C:\ffmpeg`
+   - Adicione `C:\ffmpeg\bin` ao PATH do Windows
+
+2. **Configure o arquivo `.env`**
+   - Renomeie `.env.template` para `.env`
+   - Edite com suas credenciais do Telegram
+
+### 2️⃣ Executar o Aplicativo
+
+**Duplo clique em:** `Shopee-Telegram-BOT.exe`
+
+✅ **Executar como Administrador** (recomendado)
+
+### 3️⃣ Configuração do .env
+
+Crie um arquivo `.env` na mesma pasta do executável:
+
+```env
+# Bot do Telegram
+TELEGRAM_BOT_TOKEN=seu_token_aqui
+TELEGRAM_CHAT_ID=seu_chat_id_aqui
+TELEGRAM_SEND_TOKEN=seu_token_aqui
+
+# Banco de Dados
+USE_DUAL_DATABASES=true
+DB_ORIGINAL_PATH=data/videos_original.db
+DB_PROCESSED_PATH=data/videos_processados.db
+
+# Diretórios
+DOWNLOAD_DIR=downloads
+PROCESSED_DIR=processed
+
+# Processamento
+VIDEO_TARGET_MIN_HEIGHT=720
+PREFER_VIDEO2X_FIRST=false
+```
+
+### 4️⃣ Obtendo Token do Bot
+
+1. Abra o Telegram
+2. Procure por **@BotFather**
+3. Envie `/newbot`
+4. Siga as instruções
+5. Copie o token fornecido
+
+### 5️⃣ Obtendo Chat ID
+
+**Método 1:**
+1. Procure por **@userinfobot**
+2. Envie `/start`
+3. Copie seu ID
+
+**Método 2:**
+1. Envie mensagem para seu bot
+2. Acesse: `https://api.telegram.org/bot<TOKEN>/getUpdates`
+3. Procure por `"chat":{"id":123456789}`
+
+---
+
+## 📁 Estrutura de Pastas
+
+Após a primeira execução, as seguintes pastas serão criadas automaticamente:
+
+```
+Aplicativo/
+├── Shopee-Telegram-BOT.exe  ← Executável principal
+├── .env                      ← Suas configurações
+├── data/                     ← Bancos de dados SQLite
+├── downloads/                ← Vídeos baixados
+└── processed/                ← Vídeos processados
+```
+
+---
+
+## ⚠️ Troubleshooting
+
+### Erro: "FFmpeg não encontrado"
+- Instale o FFmpeg conforme instruções acima
+- Adicione ao PATH ou configure `FFMPEG_DIR` no .env
+
+### Janela fecha imediatamente
+- Execute via terminal para ver erros:
+  ```
+  cmd /k Shopee-Telegram-BOT.exe
+  ```
+
+### Bot não recebe mensagens
+- Verifique token no .env
+- Envie `/start` para o bot
+- Confirme chat ID correto
+
+---
+
+## 🔐 Segurança
+
+⚠️ **NUNCA compartilhe seu arquivo `.env`!**
+
+Ele contém tokens sensíveis que dão acesso ao seu bot.
+
+---
+
+## 📧 Suporte
+
+Dúvidas ou problemas:
+- GitHub: https://github.com/GabrielLima-BD/P---Shopee_Telegram-BOT
+- Issues: https://github.com/GabrielLima-BD/P---Shopee_Telegram-BOT/issues
+
+---
+
+**Desenvolvido com ❤️ para automação de processos**
