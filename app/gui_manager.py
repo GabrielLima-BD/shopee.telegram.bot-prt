@@ -322,8 +322,25 @@ class VideoFormWindow:
                 # Processar o registro completo
                 try:
                     _process_record(vid_id, progress_cb=progress_cb)
-                    self.log_terminal.log(f"  ✅ [ID {vid_id}] Processamento concluído com sucesso!", "SUCCESS")
-                    self.log_terminal.update_stats(baixados=1, processados=1, enviados=1)
+                    
+                    # Verificar se realmente foi enviado checando o status no banco
+                    from .config import settings
+                    import sqlite3
+                    db_conn = sqlite3.connect(settings.DB_PROCESSADOS_PATH)
+                    cursor = db_conn.cursor()
+                    cursor.execute("SELECT status, error_message FROM videos_processados WHERE id = ?", (vid_id,))
+                    result = cursor.fetchone()
+                    db_conn.close()
+                    
+                    if result and result[0] == "processed":
+                        self.log_terminal.log(f"  ✅ [ID {vid_id}] Processamento concluído com sucesso!", "SUCCESS")
+                        self.log_terminal.update_stats(baixados=1, processados=1, enviados=1)
+                    else:
+                        status_txt = result[0] if result else 'desconhecido'
+                        err_txt = result[1] if result and len(result) > 1 and result[1] else 'sem detalhe'
+                        self.log_terminal.log(f"  ⚠️ [ID {vid_id}] Processado mas NÃO enviado! Status: {status_txt} | Erro: {err_txt}", "WARNING")
+                        self.log_terminal.update_stats(baixados=1, processados=1, falhas=1)
+                        
                 except Exception as e:
                     self.log_terminal.log(f"  ❌ [ID {vid_id}] Falha: {str(e)}", "ERROR")
                     self.log_terminal.update_stats(falhas=1)

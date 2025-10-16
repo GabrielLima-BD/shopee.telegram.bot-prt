@@ -72,7 +72,7 @@ def _download_from_telegram_file_id(file_id: str, dest_dir: str) -> Optional[str
         return None
 
 
-def _send_to_telegram(video_path: str, caption: Optional[str] = None) -> bool:
+def _send_to_telegram(video_path: str, caption: Optional[str] = None) -> tuple[bool, Optional[str]]:
     try:
         token = settings.TELEGRAM_SEND_TOKEN or settings.TELEGRAM_BOT_TOKEN
         chat_id = settings.TELEGRAM_CHAT_ID
@@ -80,13 +80,21 @@ def _send_to_telegram(video_path: str, caption: Optional[str] = None) -> bool:
         # Debug detalhado
         print(f"[SEND] Iniciando envio...")
         print(f"[SEND] Vídeo: {video_path}")
-        print(f"[SEND] Tamanho: {os.path.getsize(video_path) / (1024*1024):.2f} MB")
+        size_mb = os.path.getsize(video_path) / (1024*1024)
+        print(f"[SEND] Tamanho: {size_mb:.2f} MB")
         print(f"[SEND] Token configurado: {'SIM' if token else 'NÃO'}")
         print(f"[SEND] Chat ID: {chat_id if chat_id else 'NÃO CONFIGURADO'}")
         
         if not token or not chat_id:
-            print("[SEND] ❌ ERRO: token/chat_id não configurados.")
-            return False
+            err = "token/chat_id não configurados"
+            print(f"[SEND] ❌ ERRO: {err}.")
+            return False, err
+
+        # Limite comum do Bot API para upload direto é ~50MB; avisar cedo
+        if size_mb > 49.5:
+            err = f"arquivo muito grande ({size_mb:.2f} MB) > 50MB"
+            print(f"[SEND] ❌ ERRO: {err}")
+            return False, err
         
         url = f"https://api.telegram.org/bot{token}/sendVideo"
         print(f"[SEND] URL: https://api.telegram.org/bot...{token[-10:]}/sendVideo")
@@ -107,20 +115,23 @@ def _send_to_telegram(video_path: str, caption: Optional[str] = None) -> bool:
                 if json_response.get("ok"):
                     msg_id = json_response.get("result", {}).get("message_id")
                     print(f"[SEND] ✅ Enviado com sucesso! Message ID: {msg_id}")
-                    return True
+                    return True, None
                 else:
                     print(f"[SEND] ❌ Telegram retornou ok=false")
                     print(f"[SEND] Response: {json_response}")
-                    return False
+                    # Capturar descrição de erro se existir
+                    err = json_response.get('description') or 'ok=false'
+                    return False, err
             else:
                 print(f"[SEND] ❌ Erro HTTP {r.status_code}")
                 print(f"[SEND] Response: {r.text[:200]}")
-                return False
+                err = f"HTTP {r.status_code}: {r.text[:180]}"
+                return False, err
     except Exception as e:
         print(f"[SEND] ❌ Exceção: {type(e).__name__}: {e}")
         import traceback
         traceback.print_exc()
-        return False
+        return False, f"{type(e).__name__}: {e}"
 
 
 def _process_record(record_id: int, progress_cb: Optional[Callable[[int, str, str], None]] = None):
@@ -216,14 +227,16 @@ def _process_record(record_id: int, progress_cb: Optional[Callable[[int, str, st
         caption_parts.append(str(link_produto))
     
     caption = "\n\n".join(caption_parts) if caption_parts else ""
-    sent = _send_to_telegram(processed_path, caption=caption)
+    sent, send_err = _send_to_telegram(processed_path, caption=caption)
     print(f"[SEND] {'ok' if sent else 'erro'}")
+    if not sent and send_err:
+        print(f"[SEND] Motivo da falha: {send_err}")
     if progress_cb:
         progress_cb(record_id, "send", "ok" if sent else "fail")
 
     # Atualizar status
     status = "processed" if sent else "failed"
-    err = None if sent else "send_failed"
+    err = None if sent else (send_err or "send_failed")
     insert_or_update_processed(record_id, processed_path, status, err, (w, h, d, s), link_produto, descricao)
     if not sent:
         increment_retry(record_id)

@@ -1,53 +1,27 @@
-# 🎬 Sistema Shopee Telegram Bot
+# 🚀 Shopee Telegram BOT - Versão Standalone
 
-Sistema automatizado para processamento e distribuição de vídeos via Telegram, com upscale automático de resolução, gerenciamento de banco de dados dual e interface gráfica moderna.
+Bot automatizado para download, processamento e envio de vídeos da Shopee para o Telegram.
+**100% STANDALONE - SEM DEPENDÊNCIAS - APENAS 1 ARQUIVO .EXE**
 
 ## 📋 Índice
 
+- [Para Usuários Finais](#-para-usuários-finais-apenas-executar)
+- [Para Desenvolvedores](#-para-desenvolvedores-compilar)
 - [Características](#-características)
-- [Requisitos](#-requisitos)
-- [Instalação](#-instalação)
-- [Configuração](#-configuração)
 - [Como Usar](#-como-usar)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Troubleshooting](#-troubleshooting)
+- [Solução de Problemas](#-solução-de-problemas)
 
----
 
 ## ✨ Características
 
-### 🤖 Bot do Telegram
-- Recebe vídeos via bot do Telegram automaticamente
-- Suporta URLs diretas (.mp4) e file_id do Telegram
-- Processa links de produtos e descrições
-
-### 🎥 Processamento de Vídeo
-- **Upscale automático garantido** para resolução mínima de 720p
-- Suporta Video2X e FFmpeg
-- Validação de qualidade antes do envio
-- Três modos de processamento:
-  - Processamento individual
-  - Processamento por etapas (ideal para 30-40 vídeos)
-  - Reprocessamento de falhas
-
-### 💾 Banco de Dados Dual
-- **Banco de Vídeos Originais**: Armazena vídeos baixados
-- **Banco de Vídeos Processados**: Vídeos upscaled e prontos para envio
-- Rastreamento completo de status e tentativas
-- Viewer integrado na GUI
-
-### 🖥️ Interface Gráfica Moderna
-- Tema escuro otimizado
-- Terminal de logs em tempo real
-- Indicadores de progresso por etapa (Download → Processamento → Envio)
-- Scroll com mouse/touchpad
-- Botão de retry individual por vídeo
-- Estatísticas de processamento
-
-### 📱 Caption Inteligente
-Formato automático no Telegram:
-```
-Descrição do produto | 720p
+- **100% Standalone**: Executável único, sem dependências externas
+- **Plug & Play**: Não precisa de .env, configurações ou instalações
+- **Portátil**: Funciona em qualquer Windows, em qualquer pasta
+- **Auto-configurável**: Cria pastas e bancos de dados automaticamente
+- **Interface Gráfica**: GUI intuitiva com estatísticas em tempo real
+- **Processamento em Lote**: Processa múltiplos vídeos simultaneamente
+- **Upscale Garantido**: Garante vídeos com mínimo 720p
+- **Sistema de Retry**: Tenta novamente vídeos que falharam
 
 https://link-do-produto.com
 ```

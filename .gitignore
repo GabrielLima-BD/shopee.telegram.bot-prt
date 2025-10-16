@@ -12,6 +12,10 @@ dist/
 .env.*
 *.log
 
+# Proteger config com tokens embutidos
+# (Descomente esta linha DEPOIS de configurar tokens)
+# app/config.py
+
 # VSCode
 .vscode/
 
