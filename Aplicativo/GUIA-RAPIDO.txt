@@ -11,21 +11,27 @@
 
 ⚡ INSTALAÇÃO RÁPIDA (5 MINUTOS):
 
-1️⃣ INSTALAR FFMPEG (obrigatório):
+1️⃣ CRIAR ARQUIVO .env (OBRIGATÓRIO):
+   ⚠️ O .env DEVE estar NA MESMA PASTA do .exe!
+   
+   → Opção 1: Renomear .env.template para .env
+   → Opção 2: Criar novo arquivo chamado .env
+   → Editar .env com suas credenciais:
+     • TELEGRAM_BOT_TOKEN=seu_token_aqui
+     • TELEGRAM_CHAT_ID=seu_chat_id_aqui
+     • TELEGRAM_SEND_TOKEN=seu_token_aqui
+
+2️⃣ INSTALAR FFMPEG (obrigatório):
    → Download: https://www.gyan.dev/ffmpeg/builds/
    → Extrair para: C:\ffmpeg
    → Adicionar ao PATH: C:\ffmpeg\bin
 
-2️⃣ CONFIGURAR BOT:
-   → Renomear .env.template para .env
-   → Editar .env com suas credenciais:
-     • TELEGRAM_BOT_TOKEN
-     • TELEGRAM_CHAT_ID
-     • TELEGRAM_SEND_TOKEN
-
 3️⃣ EXECUTAR:
    → Duplo clique em Shopee-Telegram-BOT.exe
    → OU clique direito → Executar como Administrador
+   
+   ✅ Verifique os logs no terminal/GUI
+   ✅ Deve mostrar: "[CONFIG] ✅ .env encontrado!"
 
 ═══════════════════════════════════════════════════════════
 

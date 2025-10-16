@@ -1,0 +1,89 @@
+╔═══════════════════════════════════════════════════════════╗
+║  ⚠️  IMPORTANTE - LEIA ANTES DE EXECUTAR  ⚠️            ║
+╚═══════════════════════════════════════════════════════════╝
+
+🔴 PROBLEMA COMUM: "Vídeos processados mas não enviados"
+
+CAUSA: O executável NÃO está encontrando o arquivo .env!
+
+═══════════════════════════════════════════════════════════
+
+✅ SOLUÇÃO (2 PASSOS):
+
+1️⃣ CRIAR ARQUIVO .env NESTA PASTA
+   📁 O arquivo .env DEVE estar NA MESMA PASTA do .exe!
+   
+   Caminho correto:
+   📂 Aplicativo/
+   ├── Shopee-Telegram-BOT.exe  ← Executável
+   ├── .env                      ← SEU ARQUIVO AQUI!
+   ├── .env.template
+   └── ...outros arquivos
+
+2️⃣ PREENCHER O .env COM SUAS CREDENCIAIS
+   Abra o .env com Notepad e preencha:
+   
+   TELEGRAM_BOT_TOKEN=seu_token_aqui
+   TELEGRAM_CHAT_ID=seu_chat_id_aqui
+   TELEGRAM_SEND_TOKEN=seu_token_aqui
+   
+   USE_DUAL_DATABASES=true
+   DB_ORIGINAL_PATH=data/videos_original.db
+   DB_PROCESSED_PATH=data/videos_processados.db
+   
+   DOWNLOAD_DIR=downloads
+   PROCESSED_DIR=processed
+   
+   VIDEO_TARGET_MIN_HEIGHT=720
+
+═══════════════════════════════════════════════════════════
+
+🧪 COMO VERIFICAR SE ESTÁ FUNCIONANDO:
+
+Quando você executar o Shopee-Telegram-BOT.exe,
+os primeiros logs devem mostrar:
+
+✅ [CONFIG] Procurando .env em: C:\...\Aplicativo\.env
+✅ [CONFIG] ✅ .env encontrado!
+✅ [CONFIG] ✅ Variáveis carregadas do .env
+✅ [CONFIG] Telegram Token: ✅ Configurado
+✅ [CONFIG] Telegram Chat ID: ✅ Configurado
+
+❌ Se aparecer:
+   [CONFIG] ⚠️ .env NÃO encontrado
+   [CONFIG] Telegram Token: ❌ VAZIO
+   
+   → O .env NÃO está na pasta correta!
+   → Crie o .env NA MESMA PASTA do .exe
+
+═══════════════════════════════════════════════════════════
+
+📝 ESTRUTURA DE PASTAS APÓS PRIMEIRA EXECUÇÃO:
+
+📂 Aplicativo/
+├── Shopee-Telegram-BOT.exe    ← Executável
+├── .env                        ← Suas credenciais (OBRIGATÓRIO)
+├── .env.template               ← Template
+├── data/                       ← Bancos de dados (auto criado)
+│   ├── videos_original.db
+│   └── videos_processados.db
+├── downloads/                  ← Vídeos baixados (auto criado)
+└── processed/                  ← Vídeos processados (auto criado)
+
+═══════════════════════════════════════════════════════════
+
+🔐 SEGURANÇA:
+
+⚠️ NUNCA compartilhe o arquivo .env!
+   Ele contém tokens sensíveis do seu bot.
+
+═══════════════════════════════════════════════════════════
+
+📞 AINDA COM PROBLEMAS?
+
+1. Execute: test_telegram.py (se tiver Python)
+2. Verifique os logs da GUI
+3. Procure por linhas [CONFIG] nos logs
+4. Abra uma issue no GitHub
+
+═══════════════════════════════════════════════════════════

@@ -4,14 +4,15 @@
 
 ### 1️⃣ Primeira Instalação
 
-1. **Instale o FFmpeg** (obrigatório)
+1. **Crie o arquivo `.env` NESTA PASTA** (mesma pasta do .exe)
+   - Renomeie `.env.template` para `.env`
+   - Ou crie um novo arquivo chamado `.env`
+   - Edite com suas credenciais do Telegram
+
+2. **Instale o FFmpeg** (obrigatório)
    - Download: https://www.gyan.dev/ffmpeg/builds/
    - Extraia para `C:\ffmpeg`
    - Adicione `C:\ffmpeg\bin` ao PATH do Windows
-
-2. **Configure o arquivo `.env`**
-   - Renomeie `.env.template` para `.env`
-   - Edite com suas credenciais do Telegram
 
 ### 2️⃣ Executar o Aplicativo
 
@@ -19,9 +20,11 @@
 
 ✅ **Executar como Administrador** (recomendado)
 
+⚠️ **IMPORTANTE:** O arquivo `.env` DEVE estar na mesma pasta do `.exe`!
+
 ### 3️⃣ Configuração do .env
 
-Crie um arquivo `.env` na mesma pasta do executável:
+Crie um arquivo `.env` **NESTA PASTA** (ao lado do .exe):
 
 ```env
 # Bot do Telegram
