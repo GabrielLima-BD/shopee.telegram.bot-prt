@@ -76,20 +76,50 @@ def _send_to_telegram(video_path: str, caption: Optional[str] = None) -> bool:
     try:
         token = settings.TELEGRAM_SEND_TOKEN or settings.TELEGRAM_BOT_TOKEN
         chat_id = settings.TELEGRAM_CHAT_ID
+        
+        # Debug detalhado
+        print(f"[SEND] Iniciando envio...")
+        print(f"[SEND] Vídeo: {video_path}")
+        print(f"[SEND] Tamanho: {os.path.getsize(video_path) / (1024*1024):.2f} MB")
+        print(f"[SEND] Token configurado: {'SIM' if token else 'NÃO'}")
+        print(f"[SEND] Chat ID: {chat_id if chat_id else 'NÃO CONFIGURADO'}")
+        
         if not token or not chat_id:
-            print("[SEND] token/chat_id não configurados.")
+            print("[SEND] ❌ ERRO: token/chat_id não configurados.")
             return False
+        
         url = f"https://api.telegram.org/bot{token}/sendVideo"
+        print(f"[SEND] URL: https://api.telegram.org/bot...{token[-10:]}/sendVideo")
+        
         with open(video_path, "rb") as f:
             files = {"video": (os.path.basename(video_path), f, "video/mp4")}
             data = {"chat_id": chat_id, "caption": caption or ""}
+            
+            print(f"[SEND] Caption: {caption[:50] if caption else 'vazio'}...")
+            print(f"[SEND] Fazendo POST para Telegram API...")
+            
             r = SESSION.post(url, data=data, files=files, timeout=180)
-            if r.status_code == 200 and r.json().get("ok"):
-                return True
-            print(f"[SEND] erro: status={r.status_code}")
-            return False
+            
+            print(f"[SEND] Status Code: {r.status_code}")
+            
+            if r.status_code == 200:
+                json_response = r.json()
+                if json_response.get("ok"):
+                    msg_id = json_response.get("result", {}).get("message_id")
+                    print(f"[SEND] ✅ Enviado com sucesso! Message ID: {msg_id}")
+                    return True
+                else:
+                    print(f"[SEND] ❌ Telegram retornou ok=false")
+                    print(f"[SEND] Response: {json_response}")
+                    return False
+            else:
+                print(f"[SEND] ❌ Erro HTTP {r.status_code}")
+                print(f"[SEND] Response: {r.text[:200]}")
+                return False
     except Exception as e:
-        print(f"[SEND] exceção: {e}")
+        print(f"[SEND] ❌ Exceção: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
