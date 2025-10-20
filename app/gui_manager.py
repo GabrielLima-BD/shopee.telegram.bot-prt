@@ -353,7 +353,7 @@ class VideoFormWindow:
     
     def _process_by_stages_thread(self, ids: list):
         """Processar por etapas: 1) Baixar todos → 2) Processar todos → 3) Enviar todos"""
-        from .video_tools import ensure_processed, validate_min_height, ffprobe_media
+        from .video_tools import ensure_shopee_ready, validate_min_height, ffprobe_media
         from .db import update_original_path, insert_or_update_processed, increment_retry
         
         self.log_terminal.log("=== ETAPA 1: BAIXANDO TODOS OS VÍDEOS ===", "PROCESSING")
@@ -410,19 +410,17 @@ class VideoFormWindow:
         for vid_id, data in downloaded.items():
             try:
                 progress_cb(vid_id, "process", "start")
-                processed_path, method = ensure_processed(data["path"])
+                processed_path, report = ensure_shopee_ready(data["path"])
                 ok = validate_min_height(processed_path, settings.VIDEO_TARGET_MIN_HEIGHT)
-                
+
+                w, h, d, s = ffprobe_media(processed_path)
+                insert_or_update_processed(vid_id, processed_path, "pending", None, (w, h, d, s), data["link_produto"], data["descricao"])
+                processed[vid_id] = {"path": processed_path, "link_produto": data["link_produto"], "descricao": data["descricao"]}
                 if ok:
-                    w, h, d, s = ffprobe_media(processed_path)
-                    insert_or_update_processed(vid_id, processed_path, "pending", None, (w, h, d, s), data["link_produto"], data["descricao"])
-                    processed[vid_id] = {"path": processed_path, "link_produto": data["link_produto"], "descricao": data["descricao"]}
-                    self.log_terminal.log(f"✅ ID {vid_id} processado ({method})", "SUCCESS")
-                    progress_cb(vid_id, "process", "ok")
+                    self.log_terminal.log(f"✅ ID {vid_id} processado (Shopee-ready)", "SUCCESS")
                 else:
-                    self.log_terminal.log(f"❌ ID {vid_id} não atingiu altura mínima", "ERROR")
-                    insert_or_update_processed(vid_id, processed_path, "failed", "resolution_too_low", (None, None, None, None), data["link_produto"], data["descricao"])
-                    progress_cb(vid_id, "process", "fail")
+                    self.log_terminal.log(f"⚠️ ID {vid_id} processado, mas ainda abaixo de {settings.VIDEO_TARGET_MIN_HEIGHT}p (envio permitido)", "WARNING")
+                progress_cb(vid_id, "process", "ok")
             except Exception as e:
                 self.log_terminal.log(f"❌ Erro no processamento ID {vid_id}: {e}", "ERROR")
                 progress_cb(vid_id, "process", "fail")
@@ -451,15 +449,15 @@ class VideoFormWindow:
                 caption = "\n\n".join(caption_parts) if caption_parts else ""
                 
                 from .simple_processor import _send_to_telegram
-                sent = _send_to_telegram(data["path"], caption=caption)
+                sent_ok, err = _send_to_telegram(data["path"], caption=caption)
                 
-                if sent:
+                if sent_ok:
                     insert_or_update_processed(vid_id, data["path"], "processed", None, (w, h, d, s), data["link_produto"], data["descricao"])
                     self.log_terminal.log(f"✅ ID {vid_id} enviado", "SUCCESS")
                     progress_cb(vid_id, "send", "ok")
                     self.log_terminal.update_stats(enviados=1)
                 else:
-                    insert_or_update_processed(vid_id, data["path"], "failed", "send_failed", (None, None, None, None), data["link_produto"], data["descricao"])
+                    insert_or_update_processed(vid_id, data["path"], "failed", err or "send_failed", (None, None, None, None), data["link_produto"], data["descricao"])
                     increment_retry(vid_id)
                     self.log_terminal.log(f"❌ Falha no envio do ID {vid_id}", "ERROR")
                     progress_cb(vid_id, "send", "fail")

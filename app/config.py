@@ -99,9 +99,14 @@ class Settings:
 
     # Pipeline
     MAX_RETRIES: int = 2
-    VIDEO_TARGET_MIN_HEIGHT: int = 720
+    VIDEO_TARGET_MIN_HEIGHT: int = 1080
     PREFER_VIDEO2X_FIRST: bool = False
     TIMEOUT_VIDEO2X_SECONDS: int = 900
+    # Qualidade/bitrates e duração
+    VIDEO_MIN_BITRATE_KBPS: int = 2500
+    VIDEO_TARGET_BITRATE_KBPS: int = 3500
+    VIDEO_MIN_DURATION_SECONDS: int = 3
+    VIDEO_MAX_DURATION_SECONDS: int = 60
 
     # Exec flags
     ONLY_DOWNLOAD: bool = False
@@ -121,6 +126,7 @@ print(f"[CONFIG] DB Original: {settings.DB_ORIGINAIS_PATH}")
 print(f"[CONFIG] DB Processados: {settings.DB_PROCESSADOS_PATH}")
 print(f"[CONFIG] Telegram Token: {'✅ Configurado' if settings.TELEGRAM_BOT_TOKEN else '❌ VAZIO'}")
 print(f"[CONFIG] Telegram Chat ID: {'✅ Configurado' if settings.TELEGRAM_CHAT_ID else '❌ VAZIO'}")
+print(f"[CONFIG] Vídeo: alvo {settings.VIDEO_TARGET_MIN_HEIGHT}p, bitrate alvo {settings.VIDEO_TARGET_BITRATE_KBPS}k (mín {settings.VIDEO_MIN_BITRATE_KBPS}k), duração {settings.VIDEO_MIN_DURATION_SECONDS}-{settings.VIDEO_MAX_DURATION_SECONDS}s")
 
 # Assegurar diretórios
 os.makedirs(settings.DOWNLOAD_DIR, exist_ok=True)

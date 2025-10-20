@@ -13,7 +13,7 @@ from .db import (
     insert_or_update_processed,
     increment_retry,
 )
-from .video_tools import ensure_processed, validate_min_height, ffprobe_media
+from .video_tools import ensure_processed, ensure_shopee_ready, validate_min_height, ffprobe_media
 
 
 SESSION = requests.Session()
@@ -196,15 +196,16 @@ def _process_record(record_id: int, progress_cb: Optional[Callable[[int, str, st
     if not settings.ONLY_SEND:
         if progress_cb:
             progress_cb(record_id, "process", "start")
-        processed_path, method = ensure_processed(original_path)
-        print(f"[PROC] método={method}; arquivo={os.path.basename(processed_path)}")
+        processed_path, report = ensure_shopee_ready(original_path)
+        changed = report.get("changed")
+        print(f"[PROC] Shopee-ready | alterado={changed}; arquivo={os.path.basename(processed_path)}")
         if progress_cb:
             progress_cb(record_id, "process", "ok")
     else:
         processed_path = original_path
-        method = "Original"
+        # mantido comportamento de pular processamento
 
-    # Validação
+    # Validação (apenas loga; envio não será bloqueado por altura)
     ok = validate_min_height(processed_path, settings.VIDEO_TARGET_MIN_HEIGHT)
     print(f"[VAL] height >= {settings.VIDEO_TARGET_MIN_HEIGHT}? {'sim' if ok else 'não'}")
 
