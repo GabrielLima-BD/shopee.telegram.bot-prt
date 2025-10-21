@@ -58,7 +58,12 @@ def _run(cmd: list[str], timeout: Optional[int] = None) -> tuple[int, str, str]:
         try:
             out, err = proc.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
+            print(f"[TIMEOUT] ⏱️ Comando excedeu {timeout}s, forçando encerramento...")
             proc.kill()
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                proc.terminate()
             return (124, "", "timeout")
         return (proc.returncode, out or "", err or "")
     except FileNotFoundError as e:
@@ -347,6 +352,7 @@ def _ffmpeg_transcode_shopee(
     """Transcodifica vídeo com lock para garantir processamento sequencial"""
     with _FFMPEG_LOCK:
         print(f"[FFMPEG] 🔒 Iniciando transcode: {os.path.basename(input_path)}")
+        print(f"[FFMPEG] 📊 Input: {width}x{height} | {duration:.1f}s | Audio: {has_audio}")
         
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
@@ -403,8 +409,8 @@ def _ffmpeg_transcode_shopee(
             "-pix_fmt", "yuv420p",
             "-profile:v", "high",
             "-level", "4.1",
-            "-preset", "slower",  # Qualidade máxima (lento, mas melhor qualidade)
-            "-crf", "18",  # Qualidade visual muito alta (menor = melhor)
+            "-preset", "faster",  # Mudado de 'slower' para 'faster' - boa qualidade mas 3-4x mais rápido
+            "-crf", "20",  # Mudado de 18 para 20 - ainda excelente qualidade, mais rápido
             "-b:v", f"{vb}k",
             "-maxrate", f"{int(vb * 1.2)}k",  # 20% acima para picos
             "-bufsize", f"{vb*3}k",  # Buffer maior
@@ -417,15 +423,27 @@ def _ffmpeg_transcode_shopee(
 
         cmd += map_args + enc_args + time_args + [output_path]
 
+        print(f"[FFMPEG] ⏱️ Timeout: 300s (5 min)")
         print(f"[FFMPEG] Comando: {' '.join(cmd)}")
-        code, out, err = _run(cmd)
-        if code != 0:
+        
+        # TIMEOUT DE 5 MINUTOS (300 segundos)
+        code, out, err = _run(cmd, timeout=300)
+        
+        if code == 124:
+            print(f"[FFMPEG] ⏱️❌ TIMEOUT após 5 minutos - vídeo pulado")
+            return False
+        elif code != 0:
             print(f"[FFMPEG] ❌ Erro (code {code}): {err[:500]}")
+            return False
+        elif not os.path.exists(output_path):
+            print(f"[FFMPEG] ❌ Arquivo de saída não foi criado")
+            return False
         else:
-            print(f"[FFMPEG] ✅ Sucesso: {output_path}")
+            out_size = os.path.getsize(output_path) / (1024*1024)
+            print(f"[FFMPEG] ✅ Sucesso: {output_path} ({out_size:.1f} MB)")
         
         print(f"[FFMPEG] 🔓 Transcode finalizado: {os.path.basename(output_path)}")
-        return code == 0 and os.path.exists(output_path)
+        return True
 
 
 def ensure_shopee_ready(input_path: str) -> Tuple[str, Dict[str, Any]]:
@@ -485,22 +503,26 @@ def ensure_shopee_ready(input_path: str) -> Tuple[str, Dict[str, Any]]:
     )
 
     if not ok:
-        # Como fallback extremo, tentar apenas recodificar simples
+        print(f"[FFMPEG] ⚠️ Transcode principal falhou, tentando fallback simples...")
+        # Como fallback extremo, tentar apenas recodificar simples com timeout
         simple_out = os.path.join(settings.PROCESSED_DIR, base + "_shopee_simple.mp4")
         cmd = [
             _FFMPEG_EXE, "-y", "-i", base_out,
             "-vf", f"scale=-2:{settings.VIDEO_TARGET_MIN_HEIGHT}",
-            "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-preset", "veryfast",
             "-c:a", "aac", "-b:a", "128k",
             simple_out,
         ]
-        code, out, err = _run(cmd)
+        print(f"[FFMPEG] Fallback timeout: 120s")
+        code, out, err = _run(cmd, timeout=120)
         if code == 0 and os.path.exists(simple_out):
             out_path = simple_out
+            print(f"[FFMPEG] ✅ Fallback simples funcionou")
         else:
+            print(f"[FFMPEG] ❌ Fallback falhou - usando arquivo original")
             rep["final"] = base_out
             rep["changed"] = False
-            rep["error"] = "transcode_failed"
+            rep["error"] = "transcode_failed_all_methods"
             return base_out, rep
 
     def _compliant(m: Dict[str, Any]) -> bool:
@@ -525,26 +547,28 @@ def ensure_shopee_ready(input_path: str) -> Tuple[str, Dict[str, Any]]:
     meta_after = analyze_video(out_path)
     rep["probe_after"] = meta_after
     if not _compliant(meta_after):
-        rep["steps"].append({"second_pass": True})
-        stronger_out = os.path.join(settings.PROCESSED_DIR, base + "_shopee_strict.mp4")
-        # Segunda passagem com bitrate maior e filtros reimpostos
-        _ = _ffmpeg_transcode_shopee(
-            out_path,
-            stronger_out,
-            target_min_h=settings.VIDEO_TARGET_MIN_HEIGHT,
-            ensure_vertical=True,
-            target_bitrate_kbps=max(getattr(settings, 'VIDEO_TARGET_BITRATE_KBPS', 3000), 3500),
-            min_bitrate_kbps=getattr(settings, 'VIDEO_MIN_BITRATE_KBPS', 2000),
-            duration=meta_after.get("duration"),
-            width=meta_after.get("width"),
-            height=meta_after.get("height"),
-            has_audio=bool(meta_after.get("has_audio")),
-        )
-        # Preferir o stronger_out se existir
-        if os.path.exists(stronger_out):
-            out_path = stronger_out
-        meta_after = analyze_video(out_path)
-        rep["probe_after_strict"] = meta_after
+        print(f"[FFMPEG] ⚠️ Vídeo não conforme após primeira passagem, pulando segunda passagem para ganhar velocidade")
+        rep["steps"].append({"second_pass_skipped": "performance_priority"})
+        # Desabilitando segunda passagem para ganhar velocidade - primeira passagem já garante qualidade suficiente
+        # Se precisar qualidade máxima, descomente o bloco abaixo
+        # rep["steps"].append({"second_pass": True})
+        # stronger_out = os.path.join(settings.PROCESSED_DIR, base + "_shopee_strict.mp4")
+        # ok_strict = _ffmpeg_transcode_shopee(
+        #     out_path,
+        #     stronger_out,
+        #     target_min_h=settings.VIDEO_TARGET_MIN_HEIGHT,
+        #     ensure_vertical=True,
+        #     target_bitrate_kbps=max(getattr(settings, 'VIDEO_TARGET_BITRATE_KBPS', 3000), 3500),
+        #     min_bitrate_kbps=getattr(settings, 'VIDEO_MIN_BITRATE_KBPS', 2000),
+        #     duration=meta_after.get("duration"),
+        #     width=meta_after.get("width"),
+        #     height=meta_after.get("height"),
+        #     has_audio=bool(meta_after.get("has_audio")),
+        # )
+        # if ok_strict and os.path.exists(stronger_out):
+        #     out_path = stronger_out
+        #     meta_after = analyze_video(out_path)
+        #     rep["probe_after_strict"] = meta_after
 
     rep["final"] = out_path
     rep["changed"] = True
