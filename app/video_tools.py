@@ -352,7 +352,8 @@ def _ffmpeg_transcode_shopee(
     """Transcodifica vídeo com lock para garantir processamento sequencial"""
     with _FFMPEG_LOCK:
         print(f"[FFMPEG] 🔒 Iniciando transcode: {os.path.basename(input_path)}")
-        print(f"[FFMPEG] 📊 Input: {width}x{height} | {duration:.1f}s | Audio: {has_audio}")
+        duration_str = f"{duration:.1f}s" if duration is not None else "N/A"
+        print(f"[FFMPEG] 📊 Input: {width}x{height} | {duration_str} | Audio: {has_audio}")
         
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
@@ -578,12 +579,13 @@ def ensure_shopee_ready(input_path: str) -> Tuple[str, Dict[str, Any]]:
     final_w = final_meta.get("width") or 0
     final_h = final_meta.get("height") or 0
     final_br = final_meta.get("bitrate_kbps") or 0
-    final_fps = final_meta.get("fps") or 0
+    final_fps = final_meta.get("fps")
     final_size_mb = os.path.getsize(out_path) / (1024 * 1024) if os.path.exists(out_path) else 0
     
     print(f"[SHOPEE] ✅ Vídeo processado com sucesso:")
     print(f"  📐 Resolução: {final_w}x{final_h}")
-    print(f"  🎬 FPS: {final_fps:.1f}")
+    fps_str = f"{final_fps:.1f}" if final_fps else "N/A"
+    print(f"  🎬 FPS: {fps_str}")
     print(f"  💾 Tamanho: {final_size_mb:.2f} MB")
     print(f"  📊 Bitrate: {final_br} kbps")
     print(f"  🎥 Codec: {final_meta.get('vcodec', 'N/A')} / {final_meta.get('acodec', 'N/A')}")
