@@ -58,7 +58,8 @@ def _run(cmd: list[str], timeout: Optional[int] = None) -> tuple[int, str, str]:
         try:
             out, err = proc.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
-            print(f"[TIMEOUT] ⏱️ Comando excedeu {timeout}s, forçando encerramento...")
+            timeout_str = f"{timeout}s" if timeout is not None else "N/A"
+            print(f"[TIMEOUT] ⏱️ Comando excedeu {timeout_str}, forçando encerramento...")
             proc.kill()
             try:
                 proc.wait(timeout=5)
