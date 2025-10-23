@@ -323,6 +323,10 @@ class VideoFormWindow:
                 try:
                     _process_record(vid_id, progress_cb=progress_cb)
                     
+                    # Pequeno delay para garantir que o banco foi atualizado
+                    import time
+                    time.sleep(0.2)
+                    
                     # Verificar se realmente foi enviado checando o status no banco
                     from .config import settings
                     import sqlite3
@@ -338,7 +342,7 @@ class VideoFormWindow:
                     else:
                         status_txt = result[0] if result else 'desconhecido'
                         err_txt = result[1] if result and len(result) > 1 and result[1] else 'sem detalhe'
-                        self.log_terminal.log(f"  ⚠️ [ID {vid_id}] Processado mas NÃO enviado! Status: {status_txt} | Erro: {err_txt}", "WARNING")
+                        self.log_terminal.log(f"  ⚠️ [ID {vid_id}] Status final: {status_txt} | Erro: {err_txt if err_txt else 'nenhum'}", "WARNING")
                         self.log_terminal.update_stats(baixados=1, processados=1, falhas=1)
                         
                 except Exception as e:
