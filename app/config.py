@@ -71,14 +71,31 @@ class Settings:
     # ============================================
     # CONFIGURAÇÕES HARD-CODED (PREENCHA AQUI!)
     # ============================================
-    # TODO: COLOQUE SEU TOKEN E CHAT_ID AQUI!
-    _HARDCODED_BOT_TOKEN: str = "8025515620:AAFhsOSaJCEWz8n6hz0ulKYuIPnhOsbMUnQ"
-    _HARDCODED_CHAT_ID: str = "-1003111038846"
+    # Tokens/IDs informados pelo usuário em 17/11/2025
+    # Grupo Gabriel
+    _HARDCODED_BOT_TOKEN_GABRIEL: str = "8025515620:AAFhsOSaJCEWz8n6hz0ulKYuIPnhOsbMUnQ"
+    _HARDCODED_CHAT_ID_GABRIEL: str = "-1003111038846"
+    # Grupo Marli
+    _HARDCODED_BOT_TOKEN_MARLI: str = "8245552093:AAEHrDhbivDZr9MlQQat17cDH677DXTiCCo"
+    # Usuário forneceu '8085332300' — garantir prefixo -100 para canais
+    # Atualizado conforme informado pelo usuário (17/11/2025)
+    _HARDCODED_CHAT_ID_MARLI: str = "-1003334956052"
     
     # Tokens e IDs - Usa hard-coded se disponível, senão .env
-    TELEGRAM_BOT_TOKEN: str = _HARDCODED_BOT_TOKEN if _HARDCODED_BOT_TOKEN != "SEU_TOKEN_AQUI" else os.environ.get("TELEGRAM_BOT_TOKEN", "")
-    TELEGRAM_SEND_TOKEN: str = _HARDCODED_BOT_TOKEN if _HARDCODED_BOT_TOKEN != "SEU_TOKEN_AQUI" else os.environ.get("TELEGRAM_SEND_TOKEN", "")
-    TELEGRAM_CHAT_ID: str = _HARDCODED_CHAT_ID if _HARDCODED_CHAT_ID != "SEU_CHAT_ID_AQUI" else os.environ.get("TELEGRAM_CHAT_ID", "")
+    # Token usado pelo bot que roda em background (padrão: Gabriel se disponível, senão Marli)
+    TELEGRAM_BOT_TOKEN: str = _HARDCODED_BOT_TOKEN_GABRIEL or _HARDCODED_BOT_TOKEN_MARLI or os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    # Tokens/Chats para envio (específicos por destino)
+    TELEGRAM_SEND_TOKEN_GABRIEL: str = _HARDCODED_BOT_TOKEN_GABRIEL if _HARDCODED_BOT_TOKEN_GABRIEL != "SEU_TOKEN_AQUI" else os.environ.get("TELEGRAM_SEND_TOKEN_GABRIEL", "")
+    TELEGRAM_CHAT_ID_GABRIEL: str = _HARDCODED_CHAT_ID_GABRIEL if _HARDCODED_CHAT_ID_GABRIEL != "SEU_CHAT_ID_AQUI" else os.environ.get("TELEGRAM_CHAT_ID_GABRIEL", "")
+
+    TELEGRAM_SEND_TOKEN_MARLI: str = _HARDCODED_BOT_TOKEN_MARLI if _HARDCODED_BOT_TOKEN_MARLI != "SEU_TOKEN_AQUI" else os.environ.get("TELEGRAM_SEND_TOKEN_MARLI", "")
+    TELEGRAM_CHAT_ID_MARLI: str = _HARDCODED_CHAT_ID_MARLI if _HARDCODED_CHAT_ID_MARLI != "SEU_CHAT_ID_AQUI" else os.environ.get("TELEGRAM_CHAT_ID_MARLI", "")
+
+    # Compatibilidade/legacy: valores genéricos usados em código antigo
+    TELEGRAM_SEND_TOKEN: str = TELEGRAM_SEND_TOKEN_MARLI or TELEGRAM_SEND_TOKEN_GABRIEL or os.environ.get("TELEGRAM_SEND_TOKEN", "")
+    TELEGRAM_CHAT_ID: str = TELEGRAM_CHAT_ID_MARLI or TELEGRAM_CHAT_ID_GABRIEL or os.environ.get("TELEGRAM_CHAT_ID", "")
+    # Seletor de destino de envio (usado pela GUI). Pode ser 'Gabriel' ou 'Marli'.
+    SELECTED_SEND_TARGET: str = os.environ.get("SELECTED_SEND_TARGET", "Gabriel")
     TELEGRAM_CHANNEL_ID: str = os.environ.get("TELEGRAM_CHANNEL_ID", "")
     TELEGRAM_ADMIN_USER_ID: str = os.environ.get("TELEGRAM_ADMIN_USER_ID", "")
 
@@ -124,8 +141,10 @@ print(f"[CONFIG] Download dir: {settings.DOWNLOAD_DIR}")
 print(f"[CONFIG] Processed dir: {settings.PROCESSED_DIR}")
 print(f"[CONFIG] DB Original: {settings.DB_ORIGINAIS_PATH}")
 print(f"[CONFIG] DB Processados: {settings.DB_PROCESSADOS_PATH}")
-print(f"[CONFIG] Telegram Token: {'✅ Configurado' if settings.TELEGRAM_BOT_TOKEN else '❌ VAZIO'}")
-print(f"[CONFIG] Telegram Chat ID: {'✅ Configurado' if settings.TELEGRAM_CHAT_ID else '❌ VAZIO'}")
+print(f"[CONFIG] Telegram Bot token (ativo): {'✅ Configurado' if settings.TELEGRAM_BOT_TOKEN else '❌ VAZIO'}")
+print(f"[CONFIG] Telegram Send token Gabriel: {'✅' if settings.TELEGRAM_SEND_TOKEN_GABRIEL else '❌'} | Chat ID: {settings.TELEGRAM_CHAT_ID_GABRIEL}")
+print(f"[CONFIG] Telegram Send token Marli: {'✅' if settings.TELEGRAM_SEND_TOKEN_MARLI else '❌'} | Chat ID: {settings.TELEGRAM_CHAT_ID_MARLI}")
+print(f"[CONFIG] Telegram Chat ID (legacy): {'✅ Configurado' if settings.TELEGRAM_CHAT_ID else '❌ VAZIO'}")
 print(f"[CONFIG] Vídeo: alvo {settings.VIDEO_TARGET_MIN_HEIGHT}p, bitrate alvo {settings.VIDEO_TARGET_BITRATE_KBPS}k (mín {settings.VIDEO_MIN_BITRATE_KBPS}k), duração {settings.VIDEO_MIN_DURATION_SECONDS}-{settings.VIDEO_MAX_DURATION_SECONDS}s")
 
 # Assegurar diretórios

@@ -1,4 +1,34 @@
-# Python
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+dist/
+build/
+*.exe
+*.egg-info/
+Lib/site-packages/
+*.egg
+pip-wheel-metadata/
+removed_by_copilot/
+.vscode/
+.idea/
+*.log
+*.db
+*.sqlite
+__MACOSX/
+.DS_Store
+*.pydevproject
+*.sublime-project
+*.sublime-workspace
+/.pytest_cache/
+env.bak/
+/.mypy_cache/
+*.manifest
+*.spec# Python
 __pycache__/
 *.py[cod]
 *.pyo

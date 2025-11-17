@@ -54,7 +54,30 @@ def _run(cmd: list[str], timeout: Optional[int] = None) -> tuple[int, str, str]:
     - 127: executável não encontrado
     """
     try:
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        # Em Windows, ao iniciar executáveis externos como ffmpeg, o subprocess
+        # pode abrir janelas de console separadas. Para evitar que múltiplos
+        # consoles apareçam ao usuário, usamos flags/STARTUPINFO para ocultar
+        # a janela quando executando em Windows.
+        if os.name == "nt":
+            # Utiliza CREATE_NO_WINDOW quando disponível e informa um
+            # STARTUPINFO que pede para não mostrar a janela.
+            startupinfo = subprocess.STARTUPINFO()
+            try:
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            except Exception:
+                # Alguns ambientes podem não expor todas as constantes; ignora se não existir
+                pass
+            proc = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.DEVNULL,
+                text=True,
+                startupinfo=startupinfo,
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+            )
+        else:
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL, text=True)
         try:
             out, err = proc.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:

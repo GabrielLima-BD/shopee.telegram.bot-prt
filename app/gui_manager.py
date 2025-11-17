@@ -970,6 +970,27 @@ def start_gui():
         style='Dark.TButton'
     )
     btn_limpar_logs.pack(side=tk.LEFT, padx=5, ipadx=10, ipady=5)
+
+    # Seletor do destino de envio (Bot 1 / Bot 2)
+    try:
+        target_label = ttk.Label(control_frame, text="Destino:", style='Dark.TLabel')
+        target_label.pack(side=tk.LEFT, padx=(10, 2))
+
+        send_target_var = tk.StringVar(value=str(settings.SELECTED_SEND_TARGET))
+
+        def _on_target_change(event=None):
+            # Atualiza a configuração em runtime
+            settings.SELECTED_SEND_TARGET = send_target_var.get()
+            try:
+                log_terminal.log(f"🔁 Destino de envio escolhido: {settings.SELECTED_SEND_TARGET}", "INFO")
+            except Exception:
+                pass
+
+        target_combo = ttk.Combobox(control_frame, values=("Gabriel", "Marli"), width=8, textvariable=send_target_var, state="readonly")
+        target_combo.bind("<<ComboboxSelected>>", _on_target_change)
+        target_combo.pack(side=tk.LEFT, padx=2)
+    except Exception:
+        pass
     
     # Botões de banco de dados
     if settings.USE_DUAL_DATABASES:

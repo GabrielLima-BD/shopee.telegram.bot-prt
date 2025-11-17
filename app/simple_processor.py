@@ -74,15 +74,24 @@ def _download_from_telegram_file_id(file_id: str, dest_dir: str) -> Optional[str
 
 def _send_to_telegram(video_path: str, caption: Optional[str] = None) -> tuple[bool, Optional[str]]:
     try:
-        token = settings.TELEGRAM_SEND_TOKEN or settings.TELEGRAM_BOT_TOKEN
-        chat_id = settings.TELEGRAM_CHAT_ID
+        # Escolher token/chat de envio de acordo com a seleção (Gabriel or Marli)
+        # Uso getattr para evitar AttributeError caso variáveis específicas não existam
+        target = str(getattr(settings, "SELECTED_SEND_TARGET", "Gabriel"))
+        if target.strip().lower() == "marli":
+            token = getattr(settings, "TELEGRAM_SEND_TOKEN_MARLI", "") or getattr(settings, "TELEGRAM_SEND_TOKEN", "")
+            chat_id = getattr(settings, "TELEGRAM_CHAT_ID_MARLI", "") or getattr(settings, "TELEGRAM_CHAT_ID", "")
+        else:
+            # Gabriel por padrão. Usar token de envio específico do Gabriel primeiro,
+            # depois fallback para token genérico ou token do bot.
+            token = getattr(settings, "TELEGRAM_SEND_TOKEN_GABRIEL", "") or getattr(settings, "TELEGRAM_SEND_TOKEN", "") or getattr(settings, "TELEGRAM_BOT_TOKEN", "")
+            chat_id = getattr(settings, "TELEGRAM_CHAT_ID_GABRIEL", "") or getattr(settings, "TELEGRAM_CHAT_ID", "")
         
         # Debug detalhado
         print(f"[SEND] Iniciando envio...")
         print(f"[SEND] Vídeo: {video_path}")
         size_mb = os.path.getsize(video_path) / (1024*1024)
         print(f"[SEND] Tamanho: {size_mb:.2f} MB")
-        print(f"[SEND] Token configurado: {'SIM' if token else 'NÃO'}")
+        print(f"[SEND] Token configurado: {'SIM' if token else 'NÃO'} (target={target})")
         print(f"[SEND] Chat ID: {chat_id if chat_id else 'NÃO CONFIGURADO'}")
         
         if not token or not chat_id:
